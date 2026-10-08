@@ -2,7 +2,7 @@ import {exportState,waitForStateReady} from '../core/state.js';
 import {fetchDocContent,downloadImage} from '../core/yuque.js';
 import {lakeToMarkdown} from '../core/lake-converter.js';
 import {FeishuApi} from './api.js';
-import {authorize,getAccessToken,disconnect,isConnected,oauthRedirectUri} from './auth.js';
+import {authorize,setManualToken,getAccessToken,disconnect,isConnected,getAuthMode,oauthRedirectUri} from './auth.js';
 import {parseMarkdownImages,safeImageUrl,chunkMarkdown,docPath,docKey} from './markdown.js';
 
 const KEY='yuqueFeishuMigration';
@@ -30,10 +30,17 @@ function summarize(state){
 export function registerFeishuHandlers(){
   chrome.runtime.onMessage.addListener((message,sender,respond)=>{
     if(!message?.action?.startsWith('feishu:')||message.action==='feishu:progress')return false;
+    // A Yuque content script must never be able to request OAuth credentials
+    // or start a migration on the user's behalf.
+    if(!sender.url?.startsWith(chrome.runtime.getURL(''))){
+      respond({success:false,error:'仅允许从扩展自身页面调用飞书功能'});
+      return true;
+    }
     (async()=>{
       switch(message.action){
-        case 'feishu:info':return {redirectUri:oauthRedirectUri(),connected:await isConnected(),state:summarize(await load())};
-        case 'feishu:authorize':return authorize(message.appId);
+        case 'feishu:info':return {redirectUri:oauthRedirectUri(),connected:await isConnected(),authMode:await getAuthMode(),state:summarize(await load())};
+        case 'feishu:authorize':return authorize(message.appId,message.appSecret);
+        case 'feishu:manualToken':return setManualToken(message.token);
         case 'feishu:disconnect':await disconnect();return {connected:false};
         case 'feishu:start':return start(message.options);
         case 'feishu:pause':return pause();
