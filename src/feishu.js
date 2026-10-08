@@ -30,7 +30,7 @@ async function load(){
   $('authStatus').textContent=info.connected?'已授权':'尚未授权';
   display(info.state);
 }
-$('openOriginal').addEventListener('click',()=>chrome.action.openPopup());
+$('openOriginal').addEventListener('click',()=>chrome.tabs.create({url:chrome.runtime.getURL('src/popup.html')}));
 $('auth').addEventListener('click',async()=>{try{await call('authorize',{appId:$('appId').value.trim()});await load()}catch(e){error(e)}});
 $('disconnect').addEventListener('click',async()=>{try{await call('disconnect');await load()}catch(e){error(e)}});
 $('start').addEventListener('click',async()=>{
