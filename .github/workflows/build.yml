@@ -44,6 +44,6 @@ jobs:
       # with manifest.json at its root when extracted, not nested in another ZIP.
       - uses: actions/upload-artifact@v4
         with:
-          name: yuqueout-feishu-extension-v1.3.0
+          name: yuqueout-feishu-extension-v1.3.1
           path: upstream/dist/
           retention-days: 30
