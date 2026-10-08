@@ -25,6 +25,7 @@ jobs:
           node --check src/feishu/auth.js
           node --check src/feishu/markdown.js
           node --check src/feishu/migrator.js
+          node --check src/feishu-launcher.js
       - name: Clone original YuqueOut (pinned revision)
         run: |
           git clone https://github.com/Navyum/chrome-extension-yuque.git upstream
@@ -36,12 +37,12 @@ jobs:
         run: |
           npm ci
           npm run build
-      - name: Package installable extension
-        run: |
-          cd upstream/dist
-          zip -qr ../../yuqueout-feishu-extension.zip .
+      - name: Verify final extension has visible migration UI
+        run: node scripts/check-build.mjs upstream/dist
+      # Upload the extension directory directly: the GitHub artifact is ONE ZIP,
+      # with manifest.json at its root when extracted, not nested in another ZIP.
       - uses: actions/upload-artifact@v4
         with:
-          name: yuqueout-feishu-extension
-          path: yuqueout-feishu-extension.zip
+          name: yuqueout-feishu-extension-v1.3.0
+          path: upstream/dist/
           retention-days: 30
