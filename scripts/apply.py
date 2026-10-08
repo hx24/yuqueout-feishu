@@ -27,7 +27,7 @@ def patch(root):
     for host in ('https://open.feishu.cn/*', 'https://accounts.feishu.cn/*'):
         if host not in manifest['host_permissions']:
             manifest['host_permissions'].append(host)
-    manifest.update(name='YuqueOut → Feishu', version='1.3.0', description='语雀知识库一次性迁移到飞书文档')
+    manifest.update(name='YuqueOut → Feishu', version='1.3.1', description='语雀知识库一次性迁移到飞书文档')
     # Force the migration launcher as the action popup rather than YuqueOut's local export UI.
     manifest['action']['default_popup'] = 'src/feishu-launcher.html'
     manifest['action']['default_title'] = '语雀 → 飞书一次性迁移'
