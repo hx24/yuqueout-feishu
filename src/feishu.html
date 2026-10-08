@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="zh-CN">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>语雀 → 飞书一次性迁移</title>
+<style>
+body{font:14px/1.6 system-ui,-apple-system,sans-serif;background:#f6f8fc;color:#24324a;margin:0;padding:24px}
+main{max-width:880px;margin:auto;background:white;border-radius:14px;box-shadow:0 4px 16px #0001;padding:28px}
+h1{font-size:24px;margin:0 0 4px}p{color:#596b80}
+label{display:block;font-weight:600;margin:14px 0 5px}input{padding:10px 12px;border:1px solid #b7c4d9;border-radius:7px;box-sizing:border-box;min-width:300px;max-width:100%;width:100%}
+button{padding:9px 15px;margin:12px 7px 4px 0;background:#3370ff;color:white;border:0;border-radius:7px;cursor:pointer}button.secondary{background:#e7efff;color:#234aa4}
+.danger{color:#b32d2d}.subtle{color:#657184}#redirect{word-break:break-all;background:#f1f5fa;padding:9px;border-radius:6px}table{width:100%;border-collapse:collapse}td,th{border-bottom:1px solid #e7eaf1;padding:8px;text-align:left}#progressWrap{background:#e9eef8;height:9px;border-radius:8px;overflow:hidden}#progress{width:0;height:100%;background:#3370ff}
+</style></head>
+<body><main>
+<h1>语雀 → 飞书文档</h1>
+<p>一次性、单向迁移 · 基于 YuqueOut · 请先用少量文档测试，不会删除语雀原文档。</p>
+<section><h3>1. 飞书授权</h3><p>飞书开放平台自建应用 App ID（不要填写或上传 App Secret）。OAuth PKCE 兼容性仍需实测。</p>
+<label for="appId">App ID</label><input id="appId" placeholder="cli_...">
+<label>在飞书应用中配置重定向 URI</label><div id="redirect">加载中…</div>
+<div><button id="auth">授权飞书</button><button id="disconnect" class="secondary">断开飞书授权</button></div>
+<p id="authStatus"></p></section>
+<section><h3>2. 准备语雀文档</h3><p>先在原 YuqueOut 弹窗登录语雀、选择知识库并点击「获取文件信息」。当前仅支持 Doc 文档。</p><button id="openOriginal" class="secondary">打开 YuqueOut 主界面</button></section>
+<section><h3>3. 迁移目标</h3><label for="folderToken">飞书云盘目标文件夹 Token</label><input id="folderToken" value="root">
+<p>如果此前迁移过，请保持相同目标文件夹。不会自动覆盖已完成的飞书文档。</p>
+<div><button id="start">开始一次性迁移</button><button id="pause" class="secondary">暂停</button><button id="resume" class="secondary">继续</button></div>
+<p id="status" aria-live="polite"></p><div id="progressWrap"><div id="progress"></div></div></section>
+<h3>任务明细</h3><table><thead><tr><th>语雀文档</th><th>状态</th><th>详情</th></tr></thead><tbody id="items"></tbody></table>
+</main><script src="feishu.js"></script></body></html>
