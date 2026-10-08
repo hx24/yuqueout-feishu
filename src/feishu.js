@@ -27,11 +27,29 @@ function display(s){
 async function load(){
   const info=await call('info');
   $('redirect').textContent=info.redirectUri;
-  $('authStatus').textContent=info.connected?'已授权':'尚未授权';
+  $('authStatus').textContent=info.connected?'已授权 · '+(info.authMode==='manual'?'手动 user_access_token':'App ID + App Secret OAuth'):'尚未授权';
   display(info.state);
 }
 $('openOriginal').addEventListener('click',()=>chrome.tabs.create({url:chrome.runtime.getURL('src/popup.html')}));
-$('auth').addEventListener('click',async()=>{try{await call('authorize',{appId:$('appId').value.trim()});await load()}catch(e){error(e)}});
+$('auth').addEventListener('click',async()=>{
+  const button=$('auth');button.disabled=true;
+  const appSecret=$('appSecret').value;
+  try{
+    await call('authorize',{appId:$('appId').value.trim(),appSecret});
+    $('appSecret').value='';
+    await load();
+  }catch(e){error(e)}
+  finally{button.disabled=false}
+});
+$('setManualToken').addEventListener('click',async()=>{
+  const button=$('setManualToken');button.disabled=true;
+  try{
+    await call('manualToken',{token:$('manualToken').value});
+    $('manualToken').value='';
+    await load();
+  }catch(e){error(e)}
+  finally{button.disabled=false}
+});
 $('disconnect').addEventListener('click',async()=>{try{await call('disconnect');await load()}catch(e){error(e)}});
 $('start').addEventListener('click',async()=>{
   if(!confirm('准备开始一次性迁移？建议先用少量测试文档验证。'))return;
