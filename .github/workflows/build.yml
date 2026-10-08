@@ -1,0 +1,47 @@
+name: Build Chrome extension
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify source tests
+        run: |
+          node --experimental-default-type=module tests/verify.mjs
+          python3 -m py_compile scripts/apply.py
+          node --check src/feishu/api.js
+          node --check src/feishu/auth.js
+          node --check src/feishu/markdown.js
+          node --check src/feishu/migrator.js
+      - name: Clone original YuqueOut (pinned revision)
+        run: |
+          git clone https://github.com/Navyum/chrome-extension-yuque.git upstream
+          git -C upstream checkout e348e85d669a13006a3ad0291c71262d5b07e139
+      - name: Integrate Feishu migration
+        run: python3 scripts/apply.py upstream
+      - name: Install packages and build
+        working-directory: upstream
+        run: |
+          npm ci
+          npm run build
+      - name: Package installable extension
+        run: |
+          cd upstream/dist
+          zip -qr ../../yuqueout-feishu-extension.zip .
+      - uses: actions/upload-artifact@v4
+        with:
+          name: yuqueout-feishu-extension
+          path: yuqueout-feishu-extension.zip
+          retention-days: 30
