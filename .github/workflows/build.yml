@@ -20,6 +20,7 @@ jobs:
       - name: Verify source tests
         run: |
           node --experimental-default-type=module tests/verify.mjs
+          node --experimental-default-type=module tests/auth.test.mjs
           python3 -m py_compile scripts/apply.py
           node --check src/feishu/api.js
           node --check src/feishu/auth.js
