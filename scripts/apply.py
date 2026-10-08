@@ -27,7 +27,10 @@ def patch(root):
     for host in ('https://open.feishu.cn/*', 'https://accounts.feishu.cn/*'):
         if host not in manifest['host_permissions']:
             manifest['host_permissions'].append(host)
-    manifest.update(name='YuqueOut → Feishu', version='1.2.3', description='语雀知识库一次性迁移到飞书文档')
+    manifest.update(name='YuqueOut → Feishu', version='1.3.0', description='语雀知识库一次性迁移到飞书文档')
+    # Force the migration launcher as the action popup rather than YuqueOut's local export UI.
+    manifest['action']['default_popup'] = 'src/feishu-launcher.html'
+    manifest['action']['default_title'] = '语雀 → 飞书一次性迁移'
     manifest_path.write_text(json.dumps(manifest, ensure_ascii=False, indent=2) + '\n', encoding='utf8')
 
     path = root / 'src/background.js'
@@ -45,27 +48,14 @@ def patch(root):
         'export message listener')
     path.write_text(content, encoding='utf8')
 
-    path = root / 'src/popup.html'
-    content = replace_once(path.read_text(encoding='utf8'), '<body>',
-        '<body>\n<div style="padding:8px 16px;text-align:center;background:#eef3ff"><button id="openFeishuMigration" type="button" style="padding:8px 16px;border:1px solid #3370ff;border-radius:8px;background:white;color:#3370ff;cursor:pointer">迁移到飞书文档 →</button></div>',
-        'popup UI')
-    path.write_text(content, encoding='utf8')
-
-    path = root / 'src/popup.js'
-    content = replace_once(path.read_text(encoding='utf8'),
-        "document.addEventListener('DOMContentLoaded', async () => {",
-        "document.addEventListener('DOMContentLoaded', async () => {\n  document.getElementById('openFeishuMigration')?.addEventListener('click', () => chrome.tabs.create({ url: chrome.runtime.getURL('src/feishu.html') }));",
-        'popup handler')
-    path.write_text(content, encoding='utf8')
-
     path = root / 'webpack.config.js'
     content = replace_once(path.read_text(encoding='utf8'),
         "    popup: path.resolve(__dirname, 'src/popup.js'),",
-        "    popup: path.resolve(__dirname, 'src/popup.js'),\n    feishu: path.resolve(__dirname, 'src/feishu.js'),",
+        "    popup: path.resolve(__dirname, 'src/popup.js'),\n    feishu: path.resolve(__dirname, 'src/feishu.js'),\n    'feishu-launcher': path.resolve(__dirname, 'src/feishu-launcher.js'),",
         'webpack entry')
     path.write_text(content, encoding='utf8')
 
-    for src in [*(SOURCE / 'src/feishu').glob('*.js'), SOURCE / 'src/feishu.html', SOURCE / 'src/feishu.js']:
+    for src in [*(SOURCE / 'src/feishu').glob('*.js'), SOURCE / 'src/feishu.html', SOURCE / 'src/feishu.js', SOURCE / 'src/feishu-launcher.html', SOURCE / 'src/feishu-launcher.js']:
         dest = root / 'src' / src.relative_to(SOURCE / 'src')
         dest.parent.mkdir(parents=True, exist_ok=True)
         shutil.copy2(src, dest)
