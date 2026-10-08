@@ -1,0 +1,13 @@
+import assert from 'node:assert/strict';
+import {parseMarkdownImages,chunkMarkdown,safeImageUrl,docKey,docPath} from '../src/feishu/markdown.js';
+const parts=parseMarkdownImages('# Title\n\n![cat](https://cdn.nlark.com/cat.png)\n\nend');
+assert.equal(parts.length,3);
+assert.equal(parts[1].type,'image');
+assert.equal(parts[1].url,'https://cdn.nlark.com/cat.png');
+assert.equal(safeImageUrl('http://localhost/x'),false);
+assert.equal(safeImageUrl('https://127.0.0.1/x'),false);
+assert.equal(safeImageUrl('https://cdn.nlark.com/x'),true);
+assert.equal(chunkMarkdown('a\n\nb\n\nc',4).join(''),'a\n\nb\n\nc');
+assert.deepEqual(docPath({bookName:'空间/技术',folderPath:'前端/React'}),['空间','技术','前端','React']);
+assert.equal(docKey({bookId:42,id:1,bookHost:null}),'|42|1');
+console.log('PASS: markdown splitting, URL validation, chunking, and folder mapping');
